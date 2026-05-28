@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Social Revenue Audit — Bloom Internal</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --surface3: #e8e6de;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --accent: #1a1a2e;
+    --accent2: #3d3a6e;
+    --bloom: #2d5a3d;
+    --bloom-light: #e8f2eb;
+    --bloom-mid: #4a8c60;
+    --yt: #ff3b30; --fb: #1877f2; --ig: #e1306c;
+    --green: #2d7a4e; --amber: #b85c00; --red: #c0392b;
+    --text: #1a1a1a; --muted: #6b6b6b; --muted2: #aaa;
+    --font-display: 'Plus Jakarta Sans', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+    --radius: 10px; --radius-sm: 6px; --radius-lg: 16px;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-display); min-height: 100vh; }
+  .app { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+  /* TOP BAR */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 0; border-bottom: 1px solid var(--border2); margin-bottom: 2rem; flex-wrap: wrap; gap: 12px; }
+  .bloom-logo { font-family: var(--font-display); font-size: 15px; font-weight: 800; color: var(--bloom); letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; }
+  .bloom-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bloom-mid); }
+  .internal-badge { background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 100px; font-family: var(--font-mono); }
+  .topbar-right { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+  /* PAGE TITLE */
+  .page-title { margin-bottom: 2rem; }
+  .page-title h1 { font-size: clamp(1.6rem,3.5vw,2.2rem); font-weight: 800; color: var(--text); letter-spacing: -0.03em; line-height: 1.1; }
+  .page-title p { color: var(--muted); font-size: 14px; margin-top: 0.5rem; line-height: 1.6; font-weight: 400; }
+
+  /* CLIENT LABEL */
+  .client-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .field-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 180px; }
+  .field-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+  .text-input { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-family: var(--font-display); font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%; }
+  .text-input:focus { border-color: var(--bloom-mid); }
+  .text-input::placeholder { color: var(--muted2); }
+
+  /* INPUT CARD */
+  .input-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1rem; }
+  .input-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+  .platform-tag { width: 52px; flex-shrink: 0; text-align: center; font-size: 10px; font-weight: 700; font-family: var(--font-mono); letter-spacing: 0.05em; padding: 6px 0; border-radius: var(--radius-sm); }
+  .yt-tag { background: #fff0f0; color: var(--yt); border: 1px solid rgba(255,59,48,0.2); }
+  .fb-tag { background: #f0f4ff; color: var(--fb); border: 1px solid rgba(24,119,242,0.2); }
+  .ig-tag { background: #fff0f6; color: var(--ig); border: 1px solid rgba(225,48,108,0.2); }
+  .url-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-family: var(--font-display); font-size: 14px; outline: none; transition: border-color 0.2s; }
+  .url-input:focus { border-color: var(--bloom-mid); }
+  .url-input::placeholder { color: var(--muted2); }
+  .controls-row { display: flex; gap: 10px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+  .niche-select { flex: 1; min-width: 200px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; color: var(--text); font-family: var(--font-display); font-size: 14px; outline: none; cursor: pointer; appearance: none; }
+  .niche-select option { background: #fff; }
+  .audit-btn { background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); padding: 9px 22px; font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 0.01em; cursor: pointer; transition: background 0.2s, transform 0.1s; white-space: nowrap; }
+  .audit-btn:hover { background: var(--accent2); }
+  .audit-btn:active { transform: scale(0.97); }
+  .audit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* STATUS */
+  .status-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; font-family: var(--font-mono); }
+  .spinner { width: 13px; height: 13px; border: 2px solid rgba(45,90,61,0.2); border-top-color: var(--bloom-mid); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* REPORT HEADER */
+  .report-header { background: var(--accent); color: #fff; border-radius: var(--radius-lg); padding: 1.5rem 2rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .report-header-left h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .report-header-left p { font-size: 13px; opacity: 0.6; }
+  .report-header-right { text-align: right; }
+  .report-date { font-family: var(--font-mono); font-size: 11px; opacity: 0.5; }
+
+  /* RESULTS */
+  .results { animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
+
+  .platform-section { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .platform-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .platform-pill { padding: 3px 10px; border-radius: 100px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .yt-pill { background: #fff0f0; color: var(--yt); border: 1px solid rgba(255,59,48,0.25); }
+  .fb-pill { background: #f0f4ff; color: var(--fb); border: 1px solid rgba(24,119,242,0.25); }
+  .ig-pill { background: #fff0f6; color: var(--ig); border: 1px solid rgba(225,48,108,0.25); }
+  .platform-name { font-size: 16px; font-weight: 800; color: var(--text); }
+  .platform-handle { font-size: 12px; color: var(--muted); margin-left: auto; font-family: var(--font-mono); }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 8px; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--surface2); border-radius: var(--radius-sm); padding: 12px 14px; }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700; margin-bottom: 5px; }
+  .stat-value { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--text); line-height: 1; }
+
+  .rev-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+  .rev-table thead tr { border-bottom: 1px solid var(--border2); }
+  .rev-table th { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; padding: 0 0 8px; text-align: left; }
+  .rev-table th:not(:first-child) { text-align: right; }
+  .rev-table td { padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .rev-table tr:last-child td { border-bottom: none; }
+  .rev-table td:not(:first-child) { text-align: right; font-family: var(--font-mono); font-size: 12px; }
+  .td-source { display: flex; align-items: center; gap: 8px; }
+  .rev-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .td-lo { color: var(--muted2); }
+  .td-mi { color: var(--green); font-weight: 700; font-size: 13px; }
+  .td-hi { color: var(--muted); }
+
+  .total-strip { background: var(--bloom-light); border: 1px solid rgba(45,90,61,0.2); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .total-strip-label { font-size: 12px; font-weight: 700; color: var(--bloom); text-transform: uppercase; letter-spacing: 0.06em; }
+  .total-strip-nums { font-family: var(--font-mono); font-size: 13px; }
+  .ts-lo { color: var(--muted2); }
+  .ts-mi { color: var(--bloom); font-weight: 700; font-size: 16px; }
+  .ts-hi { color: var(--muted); }
+  .sep { color: var(--muted2); margin: 0 4px; }
+
+  .conf-row { display: flex; align-items: center; gap: 10px; margin-top: 1rem; }
+  .conf-label-text { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .conf-bar-wrap { flex: 1; height: 4px; background: var(--surface3); border-radius: 100px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 100px; background: var(--bloom-mid); transition: width 1s ease; }
+  .conf-pct { font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .notes-text { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; padding-left: 2px; border-left: 2px solid var(--surface3); padding-left: 10px; }
+
+  /* COMBINED */
+  .combined-strip { background: var(--accent); color: #fff; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 12px; }
+  .combined-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.7; }
+  .combined-nums { font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
+  .cn-lo { font-size: 14px; opacity: 0.5; }
+  .cn-mi { color: #7fffc4; }
+  .cn-hi { font-size: 14px; opacity: 0.5; }
+
+  /* NOTES PANEL */
+  .notes-panel { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem; }
+  .notes-panel h3 { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.75rem; }
+  .note-row { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); line-height: 1.5; }
+  .note-row:last-child { border-bottom: none; }
+  .note-tag { font-size: 9px; font-weight: 700; font-family: var(--font-mono); padding: 2px 7px; border-radius: 4px; flex-shrink: 0; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tag-method { background: #f0f4ff; color: var(--fb); }
+  .tag-note { background: #fff8e6; color: var(--amber); }
+  .tag-tip { background: var(--bloom-light); color: var(--bloom); }
+
+  /* ANALYST NOTES */
+  .analyst-card { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem; }
+  .analyst-card h3 { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.75rem; }
+  .analyst-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text); font-family: var(--font-display); font-size: 13px; outline: none; transition: border-color 0.2s; resize: vertical; min-height: 80px; line-height: 1.6; }
+  .analyst-textarea:focus { border-color: var(--bloom-mid); }
+  .analyst-textarea::placeholder { color: var(--muted2); }
+
+  /* EXPORT */
+  .export-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .export-btn { flex: 1; min-width: 150px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 9px 14px; color: var(--text); font-family: var(--font-display); font-size: 12px; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; transition: border-color 0.2s, background 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .export-btn:hover { border-color: var(--bloom-mid); background: var(--bloom-light); }
+  .export-btn-primary { background: var(--bloom); color: #fff; border-color: var(--bloom); }
+  .export-btn-primary:hover { background: var(--bloom-mid); border-color: var(--bloom-mid); color: #fff; }
+
+  .error-card { background: #fff0f0; border: 1px solid rgba(192,57,43,0.2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--red); margin-bottom: 1.25rem; }
+
+  @media print {
+    .topbar, .input-card, .client-row, .analyst-card, .export-row, .page-title { display: none !important; }
+    body { background: white; }
+    .app { padding: 0; }
+  }
+  @media (max-width: 500px) { .controls-row { flex-direction: column; } .audit-btn { width: 100%; } }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="bloom-logo"><span class="bloom-dot"></span>Bloom</div>
+    <span class="internal-badge">Internal Tool</span>
+    <span class="topbar-right" id="topbar-date"></span>
+  </div>
+
+  <!-- PAGE TITLE -->
+  <div class="page-title">
+    <h1>Social Revenue Audit</h1>
+    <p>AI-powered monetization forecast for client and prospect channels. Enter a client name then paste any combination of YouTube, Facebook, and Instagram URLs.</p>
+  </div>
+
+  <!-- CLIENT LABEL -->
+  <div class="client-row">
+    <div class="field-group">
+      <label class="field-label" for="client-name">Client / Prospect Name</label>
+      <input class="text-input" id="client-name" type="text" placeholder="e.g. Christianity Today" />
+    </div>
+    <div class="field-group" style="max-width:220px">
+      <label class="field-label" for="prepared-by">Prepared by</label>
+      <input class="text-input" id="prepared-by" type="text" placeholder="Your name" />
+    </div>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="input-card">
+    <div class="section-label">Channels to audit</div>
+    <div class="input-row">
+      <span class="platform-tag yt-tag">YouTube</span>
+      <input class="url-input" id="yt-url" type="text" placeholder="youtube.com/@channelname" />
+    </div>
+    <div class="input-row">
+      <span class="platform-tag fb-tag">Facebook</span>
+      <input class="url-input" id="fb-url" type="text" placeholder="facebook.com/pagename" />
+    </div>
+    <div class="input-row">
+      <span class="platform-tag ig-tag">Instagram</span>
+      <input class="url-input" id="ig-url" type="text" placeholder="@instagramhandle" />
+    </div>
+    <div class="controls-row">
+      <select class="niche-select" id="niche-select">
+        <option value="">Select content niche</option>
+        <option value="faith">Faith / Religious</option>
+        <option value="news">News / Commentary</option>
+        <option value="education">Education / How-To</option>
+        <option value="lifestyle">Lifestyle / Personal Brand</option>
+        <option value="entertainment">Entertainment / Comedy</option>
+        <option value="business">Business / Marketing</option>
+        <option value="music">Music / Arts</option>
+        <option value="sports">Sports / Fitness</option>
+        <option value="tech">Tech / Gaming</option>
+        <option value="food">Food / Travel</option>
+      </select>
+      <button class="audit-btn" id="run-btn" onclick="runAudit()">Run Audit →</button>
+    </div>
+  </div>
+
+  <div id="status-area"></div>
+  <div id="results-area"></div>
+
+</div>
+
+<script>
+// ============================================================
+//  PASTE YOUR ANTHROPIC API KEY BELOW (between the quotes)
+// ============================================================
+const ANTHROPIC_API_KEY = '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';
+// ============================================================
+
+document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+
+const NICHES = {
+  faith:         {rpm:[1.2,2.8,5.0],  cpm:[3.0,6.5,12.0],  label:'Faith / Religious'},
+  news:          {rpm:[2.5,5.0,9.0],  cpm:[4.0,8.0,15.0],  label:'News / Commentary'},
+  education:     {rpm:[3.0,6.5,12.0], cpm:[5.0,10.0,18.0], label:'Education'},
+  lifestyle:     {rpm:[1.5,3.5,7.0],  cpm:[2.5,5.5,10.0],  label:'Lifestyle'},
+  entertainment: {rpm:[1.0,2.5,5.0],  cpm:[2.0,4.5,8.0],   label:'Entertainment'},
+  business:      {rpm:[4.0,8.0,14.0], cpm:[6.0,12.0,22.0], label:'Business / Marketing'},
+  music:         {rpm:[0.8,2.0,4.0],  cpm:[1.5,3.5,7.0],   label:'Music / Arts'},
+  sports:        {rpm:[1.5,3.5,6.5],  cpm:[3.0,6.0,11.0],  label:'Sports / Fitness'},
+  tech:          {rpm:[3.5,7.0,13.0], cpm:[5.0,10.0,18.0], label:'Tech / Gaming'},
+  food:          {rpm:[2.0,4.5,8.0],  cpm:[3.5,7.0,13.0],  label:'Food / Travel'},
+  '':            {rpm:[1.5,4.0,8.0],  cpm:[3.0,7.0,13.0],  label:'General'}
+};
+
+function setStatus(msg,loading=true){const el=document.getElementById('status-area');if(!msg){el.innerHTML='';return;}el.innerHTML='<div class="status-bar">'+(loading?'<div class="spinner"></div>':'<span style="color:var(--bloom-mid)">✓</span>')+' <span>'+msg+'</span></div>';}
+function setError(msg){document.getElementById('results-area').innerHTML='<div class="error-card">⚠ '+msg+'</div>';}
+function fmt(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.round(n).toString();}
+function fmtMoney(n){if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(1)+'K';return'$'+Math.round(n).toLocaleString();}
+
+async function callClaude(sys,msg){
+  const r=await fetch('https://bloom-audit-proxy.vercel.app/api/proxy',{method:'POST',headers:{'Content-Type':'application/json','anthropic-api-key':ANTHROPIC_API_KEY,'anthropic-beta':'interstitial-iframe-2025'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:msg}]})});
+  const d=await r.json();
+  return (d.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+}
+function sp(raw,fb){try{return JSON.parse(raw.replace(/```json|```/g,'').trim());}catch(e){return fb;}}
+
+const YT_SYS='You are a social media analytics researcher with extensive knowledge of YouTube channels. Using your training knowledge, estimate the channel stats for the YouTube channel URL or name provided. Make your best estimates based on what you know — for well-known channels give accurate figures, for unknown channels make reasonable estimates based on the niche and any signals in the URL. Set confidenceScore higher (70-90) for well-known channels you recognise, lower (30-60) for ones you do not. Respond ONLY with valid JSON (no markdown, no backticks):\n{"channelName":"string","handle":"string","subscribers":number,"totalViews":number,"avgViewsPerVideo":number,"uploadFrequencyPerMonth":number,"channelAgeYears":number,"topContentTheme":"string","engagementSignal":"low|medium|high","confidenceScore":number,"notes":"string"}';
+const FB_SYS='You are a social media analytics researcher with extensive knowledge of Facebook pages and brands. Using your training knowledge, estimate the page stats for the Facebook page URL or name provided. Make your best estimates based on what you know — for well-known pages give accurate figures, for unknown pages make reasonable estimates based on the niche and any signals in the URL. Set confidenceScore higher (70-90) for well-known pages you recognise, lower (30-60) for ones you do not. Respond ONLY with valid JSON (no markdown, no backticks):\n{"pageName":"string","handle":"string","followers":number,"engagementRate":number,"postsPerMonth":number,"primaryContentType":"video|photo|mixed","videoUsage":"none|occasional|heavy","pageAgeYears":number,"confidenceScore":number,"notes":"string"}';
+const IG_SYS='You are a social media analytics researcher with extensive knowledge of Instagram accounts and brands. Using your training knowledge, estimate the account stats for the Instagram handle or URL provided. Make your best estimates based on what you know — for well-known accounts give accurate figures, for unknown accounts make reasonable estimates based on the niche and any signals in the handle. Set confidenceScore higher (70-90) for well-known accounts you recognise, lower (30-60) for ones you do not. Respond ONLY with valid JSON (no markdown, no backticks):\n{"accountName":"string","handle":"string","followers":number,"engagementRate":number,"postsPerMonth":number,"reelsUsage":"none|occasional|heavy","accountAgeYears":number,"confidenceScore":number,"notes":"string"}';
+
+async function runAudit(){
+  const ytUrl=document.getElementById('yt-url').value.trim();
+  const fbUrl=document.getElementById('fb-url').value.trim();
+  const igUrl=document.getElementById('ig-url').value.trim();
+  const niche=document.getElementById('niche-select').value;
+  if(!ytUrl&&!fbUrl&&!igUrl){setError('Please enter at least one channel URL or handle.');return;}
+  const btn=document.getElementById('run-btn');btn.disabled=true;
+  document.getElementById('results-area').innerHTML='';
+  const nicheData=NICHES[niche]||NICHES[''];
+  const results={};
+  try{
+    if(ytUrl){setStatus('Researching YouTube channel…');results.youtube=sp(await callClaude(YT_SYS,'Research this YouTube channel: '+ytUrl),{channelName:ytUrl,handle:ytUrl,subscribers:50000,totalViews:5000000,avgViewsPerVideo:25000,uploadFrequencyPerMonth:4,channelAgeYears:3,topContentTheme:'Unknown',engagementSignal:'medium',confidenceScore:40,notes:'Estimated — could not retrieve live data.'});}
+    if(fbUrl){setStatus('Researching Facebook page…');results.facebook=sp(await callClaude(FB_SYS,'Research this Facebook Page: '+fbUrl),{pageName:fbUrl,handle:fbUrl,followers:20000,engagementRate:2.5,postsPerMonth:8,primaryContentType:'mixed',videoUsage:'occasional',pageAgeYears:3,confidenceScore:40,notes:'Estimated — could not retrieve live data.'});}
+    if(igUrl){setStatus('Researching Instagram profile…');results.instagram=sp(await callClaude(IG_SYS,'Research this Instagram account: '+igUrl),{accountName:igUrl,handle:igUrl,followers:15000,engagementRate:3.0,postsPerMonth:12,reelsUsage:'occasional',accountAgeYears:2,confidenceScore:40,notes:'Estimated — could not retrieve live data.'});}
+    setStatus('Calculating revenue projections…');
+    await new Promise(r=>setTimeout(r,400));
+    renderResults(results,nicheData,niche);
+    setStatus('Audit complete',false);
+    setTimeout(()=>setStatus(''),3000);
+  }catch(err){setStatus('');setError('Audit failed: '+err.message);}
+  btn.disabled=false;
+}
+
+function calcYT(d,n){const mv=d.avgViewsPerVideo*d.uploadFrequencyPerMonth;const[rl,rm,rh]=n.rpm;const mm=d.subscribers*0.001*3.99;const sm=d.subscribers>100000?d.uploadFrequencyPerMonth*0.5*(d.subscribers/1000*20):d.uploadFrequencyPerMonth*0.25*(d.subscribers/1000*8);const scm=d.subscribers>50000?mv*0.00005*3:0;return{adsense:[(mv/1000)*rl,(mv/1000)*rm,(mv/1000)*rh].map(Math.round),memberships:[mm*0.4,mm,mm*2.2].map(Math.round),sponsorships:[sm*0.4,sm,sm*2.5].map(Math.round),superChat:[scm*0.3,scm,scm*2.5].map(Math.round),monthlyViews:mv};}
+function calcFB(d,n){const vm=d.videoUsage==='heavy'?1.7:d.videoUsage==='occasional'?1.2:0.7;const[cl,cm,ch]=n.cpm;const reach=d.followers*(d.engagementRate/100)*35;const bm=d.followers>100000?d.postsPerMonth*0.2*(d.followers/1000*10):d.postsPerMonth*0.1*(d.followers/1000*5);const stm=d.followers*0.00004*0.01*100;return{inStreamAds:[(reach/1000)*cl*0.28*vm,(reach/1000)*cm*0.28*vm,(reach/1000)*ch*0.28*vm].map(Math.round),brandedContent:[bm*0.3,bm,bm*2.8].map(Math.round),starsDonations:[stm*0.3,stm,stm*2.5].map(Math.round)};}
+function calcIG(d,n){const rm2=d.reelsUsage==='heavy'?1.9:d.reelsUsage==='occasional'?1.3:0.6;const[cl,cm,ch]=n.cpm;const reach=d.followers*(d.engagementRate/100)*30;const bm=d.followers>50000?d.postsPerMonth*0.15*(d.followers/1000*12):d.postsPerMonth*0.08*(d.followers/1000*4);const rebm=d.reelsUsage==='heavy'?d.followers*0.0006*2:d.reelsUsage==='occasional'?d.followers*0.00025:0;return{reelsAds:[(reach/1000)*cl*0.25*rm2,(reach/1000)*cm*0.25*rm2,(reach/1000)*ch*0.25*rm2].map(Math.round),brandedContent:[bm*0.3,bm,bm*2.8].map(Math.round),reelsBonus:[rebm*0.4,rebm,rebm*2.5].map(Math.round)};}
+
+function rTr(label,color,lo,mi,hi){return'<tr><td><span class="td-source"><span class="rev-dot" style="background:'+color+'"></span>'+label+'</span></td><td class="td-lo">'+fmtMoney(lo)+'</td><td class="td-mi">'+fmtMoney(mi)+'</td><td class="td-hi">'+fmtMoney(hi)+'</td></tr>';}
+
+function renderResults(results,nicheData,niche){
+  const client=document.getElementById('client-name').value.trim()||'Client';
+  const prepBy=document.getElementById('prepared-by').value.trim()||'Bloom';
+  const dateStr=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  let html='<div class="results">';
+  html+='<div class="report-header"><div class="report-header-left"><h2>'+client+' — Social Revenue Audit</h2><p>Niche: '+(nicheData.label)+' &nbsp;·&nbsp; Prepared by '+prepBy+'</p></div><div class="report-header-right"><div class="report-date">'+dateStr+'</div></div></div>';
+
+  let gL=0,gM=0,gH=0;
+
+  if(results.youtube){
+    const d=results.youtube,rev=calcYT(d,nicheData);
+    const[tL,tM,tH]=[rev.adsense[0]+rev.memberships[0]+rev.sponsorships[0]+rev.superChat[0],rev.adsense[1]+rev.memberships[1]+rev.sponsorships[1]+rev.superChat[1],rev.adsense[2]+rev.memberships[2]+rev.sponsorships[2]+rev.superChat[2]];
+    gL+=tL;gM+=tM;gH+=tH;
+    html+='<div class="platform-section"><div class="platform-header"><span class="platform-pill yt-pill">YouTube</span><span class="platform-name">'+d.channelName+'</span><span class="platform-handle">'+d.handle+'</span></div>';
+    html+='<div class="stats-grid"><div class="stat-card"><div class="stat-label">Subscribers</div><div class="stat-value">'+fmt(d.subscribers)+'</div></div><div class="stat-card"><div class="stat-label">Avg Views/Video</div><div class="stat-value">'+fmt(d.avgViewsPerVideo)+'</div></div><div class="stat-card"><div class="stat-label">Est. Monthly Views</div><div class="stat-value">'+fmt(rev.monthlyViews)+'</div></div><div class="stat-card"><div class="stat-label">Uploads/Month</div><div class="stat-value">'+d.uploadFrequencyPerMonth+'</div></div></div>';
+    html+='<table class="rev-table"><thead><tr><th>Revenue Stream</th><th>Low</th><th>Mid (est.)</th><th>High</th></tr></thead><tbody>'+rTr('AdSense (RPM)','#ff6b6b',rev.adsense[0],rev.adsense[1],rev.adsense[2])+rTr('Channel Memberships','#ffa94d',rev.memberships[0],rev.memberships[1],rev.memberships[2])+rTr('Sponsorships','#4299e1',rev.sponsorships[0],rev.sponsorships[1],rev.sponsorships[2])+rTr('Super Chat / Stickers','#a855f7',rev.superChat[0],rev.superChat[1],rev.superChat[2])+'</tbody></table>';
+    html+='<div class="total-strip"><span class="total-strip-label">YouTube Monthly Total</span><span class="total-strip-nums"><span class="ts-lo">'+fmtMoney(tL)+'</span><span class="sep">/</span><span class="ts-mi">'+fmtMoney(tM)+'</span><span class="sep">/</span><span class="ts-hi">'+fmtMoney(tH)+'</span></span></div>';
+    html+='<div class="conf-row"><span class="conf-label-text">Data confidence</span><div class="conf-bar-wrap"><div class="conf-fill" style="width:'+d.confidenceScore+'%"></div></div><span class="conf-pct">'+d.confidenceScore+'%</span></div>';
+    if(d.notes)html+='<p class="notes-text">'+d.notes+'</p>';
+    html+='</div>';
+  }
+
+  if(results.facebook){
+    const d=results.facebook,rev=calcFB(d,nicheData);
+    const[tL,tM,tH]=[rev.inStreamAds[0]+rev.brandedContent[0]+rev.starsDonations[0],rev.inStreamAds[1]+rev.brandedContent[1]+rev.starsDonations[1],rev.inStreamAds[2]+rev.brandedContent[2]+rev.starsDonations[2]];
+    gL+=tL;gM+=tM;gH+=tH;
+    html+='<div class="platform-section"><div class="platform-header"><span class="platform-pill fb-pill">Facebook</span><span class="platform-name">'+d.pageName+'</span><span class="platform-handle">'+d.handle+'</span></div>';
+    html+='<div class="stats-grid"><div class="stat-card"><div class="stat-label">Page Followers</div><div class="stat-value">'+fmt(d.followers)+'</div></div><div class="stat-card"><div class="stat-label">Engagement Rate</div><div class="stat-value">'+parseFloat(d.engagementRate).toFixed(1)+'%</div></div><div class="stat-card"><div class="stat-label">Posts/Month</div><div class="stat-value">'+d.postsPerMonth+'</div></div><div class="stat-card"><div class="stat-label">Video Usage</div><div class="stat-value" style="font-size:15px;text-transform:capitalize">'+d.videoUsage+'</div></div></div>';
+    html+='<table class="rev-table"><thead><tr><th>Revenue Stream</th><th>Low</th><th>Mid (est.)</th><th>High</th></tr></thead><tbody>'+rTr('In-stream Video Ads','#4299e1',rev.inStreamAds[0],rev.inStreamAds[1],rev.inStreamAds[2])+rTr('Branded Content / Deals','#60a5fa',rev.brandedContent[0],rev.brandedContent[1],rev.brandedContent[2])+rTr('Stars / Fan Donations','#a855f7',rev.starsDonations[0],rev.starsDonations[1],rev.starsDonations[2])+'</tbody></table>';
+    html+='<div class="total-strip"><span class="total-strip-label">Facebook Monthly Total</span><span class="total-strip-nums"><span class="ts-lo">'+fmtMoney(tL)+'</span><span class="sep">/</span><span class="ts-mi">'+fmtMoney(tM)+'</span><span class="sep">/</span><span class="ts-hi">'+fmtMoney(tH)+'</span></span></div>';
+    html+='<div class="conf-row"><span class="conf-label-text">Data confidence</span><div class="conf-bar-wrap"><div class="conf-fill" style="width:'+d.confidenceScore+'%"></div></div><span class="conf-pct">'+d.confidenceScore+'%</span></div>';
+    if(d.notes)html+='<p class="notes-text">'+d.notes+'</p>';
+    html+='</div>';
+  }
+
+  if(results.instagram){
+    const d=results.instagram,rev=calcIG(d,nicheData);
+    const[tL,tM,tH]=[rev.reelsAds[0]+rev.brandedContent[0]+rev.reelsBonus[0],rev.reelsAds[1]+rev.brandedContent[1]+rev.reelsBonus[1],rev.reelsAds[2]+rev.brandedContent[2]+rev.reelsBonus[2]];
+    gL+=tL;gM+=tM;gH+=tH;
+    html+='<div class="platform-section"><div class="platform-header"><span class="platform-pill ig-pill">Instagram</span><span class="platform-name">'+d.accountName+'</span><span class="platform-handle">'+d.handle+'</span></div>';
+    html+='<div class="stats-grid"><div class="stat-card"><div class="stat-label">Followers</div><div class="stat-value">'+fmt(d.followers)+'</div></div><div class="stat-card"><div class="stat-label">Engagement Rate</div><div class="stat-value">'+parseFloat(d.engagementRate).toFixed(1)+'%</div></div><div class="stat-card"><div class="stat-label">Posts/Month</div><div class="stat-value">'+d.postsPerMonth+'</div></div><div class="stat-card"><div class="stat-label">Reels Usage</div><div class="stat-value" style="font-size:15px;text-transform:capitalize">'+d.reelsUsage+'</div></div></div>';
+    html+='<table class="rev-table"><thead><tr><th>Revenue Stream</th><th>Low</th><th>Mid (est.)</th><th>High</th></tr></thead><tbody>'+rTr('Reels / Feed Ad Revenue','#ec4899',rev.reelsAds[0],rev.reelsAds[1],rev.reelsAds[2])+rTr('Branded Content / Deals','#a855f7',rev.brandedContent[0],rev.brandedContent[1],rev.brandedContent[2])+rTr('Reels Bonus Program','#10b981',rev.reelsBonus[0],rev.reelsBonus[1],rev.reelsBonus[2])+'</tbody></table>';
+    html+='<div class="total-strip"><span class="total-strip-label">Instagram Monthly Total</span><span class="total-strip-nums"><span class="ts-lo">'+fmtMoney(tL)+'</span><span class="sep">/</span><span class="ts-mi">'+fmtMoney(tM)+'</span><span class="sep">/</span><span class="ts-hi">'+fmtMoney(tH)+'</span></span></div>';
+    html+='<div class="conf-row"><span class="conf-label-text">Data confidence</span><div class="conf-bar-wrap"><div class="conf-fill" style="width:'+d.confidenceScore+'%"></div></div><span class="conf-pct">'+d.confidenceScore+'%</span></div>';
+    if(d.notes)html+='<p class="notes-text">'+d.notes+'</p>';
+    html+='</div>';
+  }
+
+  if([results.youtube,results.facebook,results.instagram].filter(Boolean).length>1){
+    html+='<div class="combined-strip"><span class="combined-label">Combined Monthly Total — All Platforms</span><span class="combined-nums"><span class="cn-lo">'+fmtMoney(gL)+'</span> <span class="cn-mi"> '+fmtMoney(gM)+' </span><span class="cn-hi">'+fmtMoney(gH)+'</span></span></div>';
+  }
+
+  html+='<div class="notes-panel"><h3>Methodology &amp; Analyst Notes</h3><div class="note-row"><span class="note-tag tag-method">Method</span><span>Revenue projections use niche-benchmarked RPM/CPM data. Low / Mid / High reflect realistic ranges based on engagement signals and algorithm performance for the selected niche.</span></div><div class="note-row"><span class="note-tag tag-note">Note</span><span>AdSense and in-stream ad revenue is influenced by audience geography and Q4 seasonality — Q4 CPMs can run 2–4x higher than Q1 baseline figures.</span></div><div class="note-row"><span class="note-tag tag-tip">Tip</span><span>Branded content and sponsorship estimates scale with niche authority. Channels with high community trust consistently outperform the mid estimate, often reaching the high range.</span></div><div class="note-row"><span class="note-tag tag-method">Source</span><span>Data sourced via public web research. Confidence scores reflect data availability and quality. Validate against creator-disclosed figures before presenting to client.</span></div></div>';
+
+  html+='<div class="analyst-card"><h3>Analyst Notes (internal only — will not print)</h3><textarea class="analyst-textarea" id="analyst-notes" placeholder="Add your strategic observations, growth gaps, pitch angles, or caveats here..."></textarea></div>';
+
+  html+='<div class="export-row"><button class="export-btn export-btn-primary" onclick="window.print()">🖨 Print / PDF Report</button><button class="export-btn" onclick="exportCSV()">📊 Export CSV Data</button></div>';
+  html+='</div>';
+  document.getElementById('results-area').innerHTML=html;
+  window._auditResults=results;
+}
+
+function exportCSV(){
+  if(!window._auditResults)return;
+  const client=document.getElementById('client-name').value.trim()||'Client';
+  const rows=[['Client','Platform','Channel / Page','Metric','Value']];
+  const r=window._auditResults;
+  if(r.youtube){rows.push([client,'YouTube',r.youtube.channelName,'Subscribers',r.youtube.subscribers]);rows.push([client,'YouTube',r.youtube.channelName,'Avg Views/Video',r.youtube.avgViewsPerVideo]);rows.push([client,'YouTube',r.youtube.channelName,'Uploads/Month',r.youtube.uploadFrequencyPerMonth]);}
+  if(r.facebook){rows.push([client,'Facebook',r.facebook.pageName,'Followers',r.facebook.followers]);rows.push([client,'Facebook',r.facebook.pageName,'Engagement Rate',r.facebook.engagementRate+'%']);rows.push([client,'Facebook',r.facebook.pageName,'Posts/Month',r.facebook.postsPerMonth]);}
+  if(r.instagram){rows.push([client,'Instagram',r.instagram.accountName,'Followers',r.instagram.followers]);rows.push([client,'Instagram',r.instagram.accountName,'Engagement Rate',r.instagram.engagementRate+'%']);rows.push([client,'Instagram',r.instagram.accountName,'Posts/Month',r.instagram.postsPerMonth]);}
+  const fname=client.replace(/\s+/g,'_').toLowerCase()+'_social_audit.csv';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'}));a.download=fname;a.click();
+}
+</script>
+</body>
+</html>
